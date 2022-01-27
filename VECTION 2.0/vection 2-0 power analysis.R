@@ -182,72 +182,61 @@ Powerframe_Vection_2.0 = data.frame()
 nIterationsLower = 1
 nIterationsUpper = 200
 time_init_overall = Sys.time()
-for (iteration in nIterationsLower:nIterationsUpper){
-  
-  time_init = Sys.time()
-  
-  for (j in 1:3){
-    for (k in c(6,8,10)){
-      
-      Dataframe = SimulateData(nReps = j, nParticipants = k)
-      DataframeLappe_Simulated = GetLappeParameters(Dataframe)
-      
-      ModelGain = lmer(LappeGain ~ Session*Jitter + (Session + Jitter|ID),
-                       data = DataframeLappe_Simulated %>% 
-                         group_by(Jitter,Session,ID) %>% 
-                         slice(1))
-      summary(ModelGain)
-      ModelDecay = lmer(LappeDecay ~ Session*Jitter + (Session + Jitter|ID),
-                        data = DataframeLappe_Simulated %>%
-                          group_by(Jitter,Session,ID) %>%
-                          slice(1))
-      summary(ModelDecay)
-      
-      #these take AGES to fit and seem to show differences when there are differences in Gain/Decay as well
-      # ModelCountingUp = lmer(TargetDistance/PredictionLappeCountingUp_Obj ~ Session*Jitter + (Session + Jitter + TargetDistance|ID),
-      #               data = Dataframe,
-      #               lmerControl(optimizer = "nloptwrap"))
-      # ModelCountingDown = lmer(TargetDistance/PredictionLappeCountingDown_Obj ~ Session*Jitter + (Session + Jitter + TargetDistances|ID),
-      #               data = Dataframe,
-      #               lmerControl(optimizer = "nloptwrap"))
-      
-      Powerframe_Vection_2.0 = rbind(Powerframe_Vection_2.0,
-                                     data.frame(Label = rownames(summary(ModelGain)$coef),
-                                                pvalue = summary(ModelGain)$coef[,"Pr(>|t|)"],
-                                                coefficient = summary(ModelGain)$coef[,"Estimate"],
-                                                DependentVariable = "LappeGain",
-                                                nParticipants = k,
-                                                nReps = j,
-                                                nIteration = iteration),
-                                     data.frame(Label = rownames(summary(ModelDecay)$coef),
-                                                pvalue = summary(ModelDecay)$coef[,"Pr(>|t|)"],
-                                                coefficient = summary(ModelDecay)$coef[,"Estimate"],
-                                                DependentVariable = "LappeDecay",
-                                                nParticipants = k,
-                                                nReps = j,
-                                                nIteration = iteration))
-      # data.frame(Label = rownames(summary(ModelCountingUp)$coef),
-      #            pvalue = summary(ModelCountingUp)$coef[,"Pr(>|t|)"],
-      #            coefficient = summary(ModelCountingUp)$coef[,"Estimate"],
-      #            DependentVariable = "ModelCountingUp"),
-      # data.frame(Label = rownames(summary(ModelCountingDown)$coef),
-      #            pvalue = summary(ModelCountingDown)$coef[,"Pr(>|t|)"],
-      #            coefficient = summary(ModelCountingDown)$coef[,"Estimate"],
-      #            DependentVariable = "ModelCountingDown"))
-      
-      save(Powerframe_Vection_2.0, file = paste0(dirname(rstudioapi::getSourceEditorContext()$path),
-                                                 "/SavedVariables/Powerframe_Vection_2.0.RData"))
-      load(file=paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/SavedVariables/Powerframe_Vection_2.0.RData"))
-      
-    }
-  }
-  
-  print(paste0("Iteration #", iteration, " has passed. It took ", round(difftime(Sys.time(), time_init, units='mins'),2), " minute(s). That means, the whole thing should take about ",
-               round((nIterationsUpper-nIterationsLower-1)*difftime(Sys.time(), time_init, units='mins'),2), " minute(s). ", round(difftime(Sys.time(), time_init_overall, units='mins'),2),
-               " minutes have already passed."))
-}
 
+#this takes several hours to simulate. You can instead load the results of the simulation with the following line:
 load(file=paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/SavedVariables/Powerframe_Vection_2.0.RData"))
+
+#if you want to run the simulations yourself, uncomment the following for loop
+# for (iteration in nIterationsLower:nIterationsUpper){
+# 
+#   time_init = Sys.time()
+# 
+#   for (j in 1:3){
+#     for (k in c(6,8,10)){
+# 
+#       Dataframe = SimulateData(nReps = j, nParticipants = k)
+#       DataframeLappe_Simulated = GetLappeParameters(Dataframe)
+# 
+#       ModelGain = lmer(LappeGain ~ Session*Jitter + (Session + Jitter|ID),
+#                        data = DataframeLappe_Simulated %>%
+#                          group_by(Jitter,Session,ID) %>%
+#                          slice(1))
+#       summary(ModelGain)
+#       ModelDecay = lmer(LappeDecay ~ Session*Jitter + (Session + Jitter|ID),
+#                         data = DataframeLappe_Simulated %>%
+#                           group_by(Jitter,Session,ID) %>%
+#                           slice(1))
+#       summary(ModelDecay)
+# 
+#       Powerframe_Vection_2.0 = rbind(Powerframe_Vection_2.0,
+#                                      data.frame(Label = rownames(summary(ModelGain)$coef),
+#                                                 pvalue = summary(ModelGain)$coef[,"Pr(>|t|)"],
+#                                                 coefficient = summary(ModelGain)$coef[,"Estimate"],
+#                                                 DependentVariable = "LappeGain",
+#                                                 nParticipants = k,
+#                                                 nReps = j,
+#                                                 nIteration = iteration),
+#                                      data.frame(Label = rownames(summary(ModelDecay)$coef),
+#                                                 pvalue = summary(ModelDecay)$coef[,"Pr(>|t|)"],
+#                                                 coefficient = summary(ModelDecay)$coef[,"Estimate"],
+#                                                 DependentVariable = "LappeDecay",
+#                                                 nParticipants = k,
+#                                                 nReps = j,
+#                                                 nIteration = iteration))
+# 
+#       save(Powerframe_Vection_2.0, file = paste0(dirname(rstudioapi::getSourceEditorContext()$path),
+#                                                  "/SavedVariables/Powerframe_Vection_2.0.RData"))
+#       load(file=paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/SavedVariables/Powerframe_Vection_2.0.RData"))
+# 
+#     }
+#   }
+# 
+#   print(paste0("Iteration #", iteration, " has passed. It took ", round(difftime(Sys.time(), time_init, units='mins'),2), " minute(s). That means, the whole thing should take about ",
+#                round((nIterationsUpper-nIterationsLower-1)*difftime(Sys.time(), time_init, units='mins'),2), " minute(s). ", round(difftime(Sys.time(), time_init_overall, units='mins'),2),
+#                " minutes have already passed."))
+# }
+
+
 
 #Just add some prettier labels:
 Power = Powerframe_Vection_2.0 %>% 
